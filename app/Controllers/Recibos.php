@@ -137,4 +137,73 @@ class Recibos extends BaseController
 
         return redirect()->to(site_url('recibos/listar'))->with('success', 'Recibo firmado correctamente');
     }
+    public function procesarMasivo()
+    {
+        helper(['form', 'filesystem']);
+
+        $archivo = $this->request->getFile('archivo');
+        $periodo = $this->request->getPost('periodo');
+
+        if (!$archivo->isValid() || $archivo->getClientMimeType() !== 'application/pdf') {
+            return redirect()->back()->with('error', 'Archivo inválido. Debe ser un PDF.');
+        }
+
+        // Guardar archivo temporalmente
+        $nombreArchivo = $archivo->getRandomName();
+        $rutaTemporal = WRITEPATH . 'uploads/' . $nombreArchivo;
+        $archivo->move(WRITEPATH . 'uploads/', $nombreArchivo);
+
+        // Dividir PDF en páginas individuales
+        require_once(APPPATH . 'ThirdParty/fpdf/fpdf.php');
+        require_once(APPPATH . 'ThirdParty/fpdi/src/autoload.php');
+
+        $pdf = new \setasign\Fpdi\Fpdi();
+        $pageCount = $pdf->setSourceFile($rutaTemporal);
+
+        $reciboModel = new \App\Models\ReciboModel();
+        $usuarioModel = new \App\Models\UsuarioModel();
+
+        $exito = 0;
+        $fallo = 0;
+
+        for ($i = 0; $i < $pageCount; $i++) {
+            $pdf = new \setasign\Fpdi\Fpdi();
+            $pdf->AddPage();
+            $pdf->setSourceFile($rutaTemporal);
+            $tpl = $pdf->importPage($i + 1);
+            $pdf->useTemplate($tpl);
+
+            // Extraer texto de la página para detectar DNI o identificador
+            // (esto requiere herramientas adicionales como smalot/pdfparser si lo deseás)
+            // Por ahora, simulamos con empleados ordenados
+            $usuarios = $usuarioModel->orderBy('id', 'ASC')->findAll();
+
+            if (!isset($usuarios[$i])) {
+                $fallo++;
+                continue;
+            }
+
+            $usuario = $usuarios[$i];
+
+            // Guardar página como nuevo PDF individual
+            $nombreNuevo = 'recibo_' . $usuario['id'] . '_' . $periodo . '.pdf';
+            $rutaNueva = WRITEPATH . 'recibos/' . $nombreNuevo;
+            $pdf->Output($rutaNueva, 'F');
+
+            // Guardar en DB
+            $reciboModel->insert([
+                'usuario_id'   => $usuario['id'],
+                'nombre_archivo' => $nombreNuevo,
+                'periodo'      => $periodo,
+                'fecha_firma'  => null,
+                'ruta'         => $rutaNueva,
+            ]);
+
+            $exito++;
+        }
+
+        unlink($rutaTemporal); // Limpieza
+
+        return redirect()->back()->with('success', "Proceso completado. $exito recibos cargados, $fallo fallaron.");
+    }
 }

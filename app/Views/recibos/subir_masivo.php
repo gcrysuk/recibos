@@ -1,39 +1,32 @@
-<!-- app/Views/recibos/subir_masivo.php -->
-
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/default') ?>
 <?= $this->section('content') ?>
 
-<h2>Subir Recibos de Sueldo (Carga Masiva)</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Subir Recibos Masivos</h2>
 
-<?php if (session()->getFlashdata('mensaje')): ?>
-    <div class="alert alert-success">
-        <?= session()->getFlashdata('mensaje') ?>
-    </div>
-<?php endif; ?>
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
+    <?php endif; ?>
 
-<form action="<?= base_url('recibos/subir-masivo') ?>" method="post" enctype="multipart/form-data">
-    <?= csrf_field() ?>
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
+    <?php endif; ?>
 
-    <div class="form-group">
-        <label for="periodo">Período (por ejemplo, 04/2025):</label>
-        <input type="text" name="periodo" class="form-control" required placeholder="MM/AAAA">
-    </div>
+    <form action="<?= base_url('recibos/procesar-masivo') ?>" method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
 
-    <div class="form-group mt-3">
-        <label for="archivos">Seleccionar archivos PDF (puede elegir varios):</label>
-        <input type="file" name="archivos[]" class="form-control" multiple accept="application/pdf" required>
-        <small class="form-text text-muted">El nombre de cada archivo debe incluir el número de documento del empleado (ejemplo: 20333444_recibo.pdf).</small>
-    </div>
+        <div class="mb-3">
+            <label for="periodo" class="form-label">Período (Ej: 2025-05)</label>
+            <input type="month" id="periodo" name="periodo" class="form-control" required>
+        </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Subir Recibos</button>
-</form>
+        <div class="mb-3">
+            <label for="archivo" class="form-label">Archivo PDF (1 recibo por página)</label>
+            <input type="file" id="archivo" name="archivo" class="form-control" accept=".pdf" required>
+        </div>
 
-<form action="<?= site_url('recibos/subirMasivo') ?>" method="post" enctype="multipart/form-data">
-    <label for="archivos">Seleccionar archivos PDF:</label>
-    <input type="file" name="archivos[]" id="archivos" multiple accept="application/pdf">
-    <br><br>
-    <button type="submit">Subir recibos</button>
-</form>
-
+        <button type="submit" class="btn btn-primary">Procesar Recibos</button>
+    </form>
+</div>
 
 <?= $this->endSection() ?>
