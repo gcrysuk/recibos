@@ -1,0 +1,32 @@
+/app
+  /Controllers
+    Documentos.php
+    Auth.php
+  /Models
+    DocumentoModel.php
+    UsuarioModel.php
+  /Views
+    /documentos
+      listado.php
+      upload.php
+      view.php
+    /auth
+      login.php
+  /Config
+  /Filters
+  /Helpers
+  /Language
+  /Libraries
+  /ThirdParty
+
+/writable
+  /uploads      # Aquí van los PDFs subidos
+  /cache
+  /logs
+
+/tests
+/public
+  /assets
+    /css
+    /js
+    /images

@@ -4,23 +4,23 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class ReciboModel extends Model
+class UserModel extends Model
 {
-    protected $table            = 'recibos';
+    protected $table            = 'users';
     protected $primaryKey       = 'id';
 
     protected $allowedFields    = [
-        'usuario_id',
-        'archivo',
-        'mes',
-        'anio',
-        'estado',
-        'fecha_firma'
+        'nombre',
+        'email',
+        'password_hash',
+        'activo',
+        'created_at',
+        'updated_at'
     ];
-
-    protected $returnType       = 'array';
 
     protected $useTimestamps    = true;
     protected $createdField     = 'created_at';
     protected $updatedField     = 'updated_at';
+
+    protected $returnType       = 'array';
 }
