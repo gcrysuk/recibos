@@ -11,10 +11,10 @@ class ReciboModel extends Model
 
     protected $allowedFields    = [
         'usuario_id',
+        'titulo',
         'archivo',
-        'mes',
-        'anio',
-        'estado',
+        'periodo',
+        'firmado',
         'fecha_firma'
     ];
 
